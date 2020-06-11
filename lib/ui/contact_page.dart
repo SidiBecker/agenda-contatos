@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:agenda_contatos/helpers/contact_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ContactPage extends StatefulWidget {
   final Contact contact;
@@ -88,11 +89,23 @@ class _ContactPageState extends State<ContactPage> {
                     decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
+                            fit: BoxFit.cover,
                             image: _editedContact.img != null
                                 ? FileImage(File(_editedContact.img))
                                 : AssetImage("images/contact_default.png"))),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    ImagePicker imagePicker = ImagePicker();
+                    imagePicker
+                        .getImage(source: ImageSource.camera)
+                        .then((file) {
+                      if (file == null) return;
+
+                      setState(() {
+                        _editedContact.img = file.path;
+                      });
+                    });
+                  },
                 ),
                 TextField(
                   decoration: InputDecoration(labelText: "Name"),
@@ -140,7 +153,7 @@ class _ContactPageState extends State<ContactPage> {
   Future<bool> _requestPop() {
     if (_userEdited) {
       showDialog(
-        //TODO: Componentizar essa função
+          //TODO: Componentizar essa função
           context: context,
           builder: (context) {
             return AlertDialog(

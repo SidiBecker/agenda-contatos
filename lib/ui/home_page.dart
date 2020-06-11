@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:agenda_contatos/helpers/contact_helper.dart';
 import 'package:agenda_contatos/ui/contact_page.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+enum OrderOptions { orderatoz, orderztoa }
 
 class HomePage extends StatefulWidget {
   @override
@@ -28,6 +31,21 @@ class _HomePageState extends State<HomePage> {
         title: Text("Contatos"),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
+        actions: <Widget>[
+          PopupMenuButton<OrderOptions>(
+            itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
+              const PopupMenuItem(
+                child: Text("Ordenar de A-Z"),
+                value: OrderOptions.orderatoz,
+              ),
+              const PopupMenuItem(
+                child: Text("Ordenar de Z-A"),
+                value: OrderOptions.orderztoa,
+              )
+            ],
+            onSelected: _orderList,
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
@@ -61,6 +79,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
+                        fit: BoxFit.cover,
                         image: contacts[index].img != null
                             ? FileImage(File(contacts[index].img))
                             : AssetImage("images/contact_default.png"))),
@@ -120,6 +139,7 @@ class _HomePageState extends State<HomePage> {
     List list = await helper.getAllContacts();
     setState(() {
       contacts = list;
+      _orderList(OrderOptions.orderatoz);
     });
   }
 
@@ -141,7 +161,10 @@ class _HomePageState extends State<HomePage> {
                           child: Text("Ligar",
                               style: TextStyle(
                                   fontSize: 20, color: Colors.deepPurple)),
-                          onPressed: () {},
+                          onPressed: () {
+                            launch("tel:${contacts[index].phone}");
+                            Navigator.pop(context);
+                          },
                         ),
                       ),
                       Padding(
@@ -176,5 +199,21 @@ class _HomePageState extends State<HomePage> {
                 );
               });
         });
+  }
+
+  _orderList(OrderOptions options) {
+    switch (options) {
+      case OrderOptions.orderatoz:
+        contacts.sort((a, b) {
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+      case OrderOptions.orderztoa:
+        contacts.sort((a, b) {
+          return b.name.toLowerCase().compareTo(a.name.toLowerCase());
+        });
+    }
+
+    setState(() {});
   }
 }
