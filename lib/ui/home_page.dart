@@ -30,7 +30,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Contatos"),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
         actions: <Widget>[
           PopupMenuButton<OrderOptions>(
             itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
@@ -50,7 +49,6 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        backgroundColor: Colors.deepPurple,
         onPressed: () {
           _showContactPage();
         },
@@ -160,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                         child: FlatButton(
                           child: Text("Ligar",
                               style: TextStyle(
-                                  fontSize: 20, color: Colors.deepPurple)),
+                                  fontSize: 20, color: Theme.of(context).primaryColor)),
                           onPressed: () {
                             launch("tel:${contacts[index].phone}");
                             Navigator.pop(context);
@@ -172,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                         child: FlatButton(
                           child: Text("Editar",
                               style: TextStyle(
-                                  fontSize: 20, color: Colors.deepPurple)),
+                                  fontSize: 20, color: Theme.of(context).primaryColor)),
                           onPressed: () {
                             Navigator.pop(context);
                             _showContactPage(contact: contacts[index]);
@@ -184,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                         child: FlatButton(
                           child: Text("Excluir",
                               style: TextStyle(
-                                  fontSize: 20, color: Colors.deepPurple)),
+                                  fontSize: 20, color: Theme.of(context).primaryColor)),
                           onPressed: () {
                             helper.deleteContact(contacts[index].id);
                             setState(() {

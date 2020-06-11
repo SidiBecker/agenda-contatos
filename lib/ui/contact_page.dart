@@ -50,36 +50,33 @@ class _ContactPageState extends State<ContactPage> {
         onWillPop: _requestPop,
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.deepPurple,
             title: Text(_editedContact.name ?? "Novo Contato"),
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              bool valid = true;
-              FocusNode focusNode = FocusNode();
+              onPressed: () {
+                bool valid = true;
+                FocusNode focusNode = FocusNode();
 
-              void fieldValidate(String valueField, FocusNode focus) {
-                if (valid && (valueField == null || valueField.isEmpty)) {
-                  valid = false;
-                  focusNode = focus;
+                void fieldValidate(String valueField, FocusNode focus) {
+                  if (valid && (valueField == null || valueField.isEmpty)) {
+                    valid = false;
+                    focusNode = focus;
+                  }
                 }
-              }
 
-              fieldValidate(_editedContact.name, _nameFocus);
-              fieldValidate(_editedContact.email, _emailFocus);
-              fieldValidate(_editedContact.phone, _phoneFocus);
+                fieldValidate(_editedContact.name, _nameFocus);
+                fieldValidate(_editedContact.email, _emailFocus);
+                fieldValidate(_editedContact.phone, _phoneFocus);
 
-              if (!valid) {
-                //Coloca o foco no campo inválido
-                FocusScope.of(context).requestFocus(focusNode);
-              } else {
-                //TODO: Salvar o objeto nesta página
-                Navigator.pop(context, _editedContact);
-              }
-            },
-            child: Icon(Icons.save),
-            backgroundColor: Colors.deepPurple,
-          ),
+                if (!valid) {
+                  //Coloca o foco no campo inválido
+                  FocusScope.of(context).requestFocus(focusNode);
+                } else {
+                  //TODO: Salvar o objeto nesta página
+                  Navigator.pop(context, _editedContact);
+                }
+              },
+              child: Icon(Icons.save)),
           body: SingleChildScrollView(
             padding: EdgeInsets.all(10.0),
             child: Column(
