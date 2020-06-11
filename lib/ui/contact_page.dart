@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:agenda_contatos/helpers/contact_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_masked_text/flutter_masked_text.dart';
 
 class ContactPage extends StatefulWidget {
   final Contact contact;
@@ -19,7 +20,8 @@ class _ContactPageState extends State<ContactPage> {
 
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
+  MaskedTextController _phoneController =
+      MaskedTextController(mask: '(00) 00000-0000');
 
   final _nameFocus = FocusNode();
   final _emailFocus = FocusNode();
@@ -107,43 +109,12 @@ class _ContactPageState extends State<ContactPage> {
                     });
                   },
                 ),
-                TextField(
-                  decoration: InputDecoration(labelText: "Name"),
-                  focusNode: _nameFocus,
-                  onChanged: (text) {
-                    _userEdited = true;
-
-                    setState(() {
-                      _editedContact.name = text;
-                    });
-                  },
-                  controller: _nameController,
-                ),
-                TextField(
-                  decoration: InputDecoration(labelText: "Email"),
-                  focusNode: _emailFocus,
-                  onChanged: (text) {
-                    _userEdited = true;
-
-                    setState(() {
-                      _editedContact.email = text;
-                    });
-                  },
-                  keyboardType: TextInputType.emailAddress,
-                  controller: _emailController,
-                ),
-                TextField(
-                    decoration: InputDecoration(labelText: "Phone"),
-                    focusNode: _phoneFocus,
-                    onChanged: (text) {
-                      _userEdited = true;
-
-                      setState(() {
-                        _editedContact.phone = text;
-                      });
-                    },
-                    keyboardType: TextInputType.phone,
-                    controller: _phoneController),
+                _buildTextField("Name", _nameFocus, "name", TextInputType.text,
+                    _nameController),
+                _buildTextField("Email", _emailFocus, "email",
+                    TextInputType.emailAddress, _emailController),
+                _buildTextField("Phone", _phoneFocus, "phone",
+                    TextInputType.phone, _phoneController)
               ],
             ),
           ),
@@ -180,5 +151,21 @@ class _ContactPageState extends State<ContactPage> {
     } else {
       return Future.value(true);
     }
+  }
+
+  Widget _buildTextField(String label, FocusNode focusNode, String prop,
+      TextInputType type, TextEditingController editingController) {
+    return TextField(
+        decoration: InputDecoration(labelText: label),
+        focusNode: focusNode,
+        onChanged: (text) {
+          _userEdited = true;
+
+          setState(() {
+            _editedContact.setProps = {prop: text};
+          });
+        },
+        keyboardType: type,
+        controller: editingController);
   }
 }

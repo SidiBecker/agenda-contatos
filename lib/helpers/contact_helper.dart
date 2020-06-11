@@ -125,6 +125,27 @@ class Contact {
     return map;
   }
 
+  Map<String, dynamic> get map {
+    return {"name": name};
+  }
+
+  final Map<Symbol, String> _keys = new Map<Symbol, String>();
+  final Map<Symbol, dynamic> _values = new Map<Symbol, dynamic>();
+
+  toJson() {
+    var map = new Map<String, dynamic>();
+    _keys.forEach((symbol, name) => map[name] = _values[symbol]);
+    return map;
+  }
+
+  set setProps(props) {
+    this.id = props['id'] ?? this.id;
+    this.name = props['name'] ?? this.name;
+    this.email = props['email'] ?? this.email;
+    this.phone = props['phone'] ?? this.phone;
+    this.img = props['img'] ?? this.img;
+  }
+
   @override
   String toString() {
     return "Contact(id: $id, name: $name, email: $email, phone: $phone, img: $img)";
