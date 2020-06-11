@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:agenda_contatos/helpers/contact_helper.dart';
+import 'package:agenda_contatos/ui/contact_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,11 +18,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    helper.getAllContacts().then((values) {
-      setState(() {
-        contacts = values;
-      });
-    });
+    _getAllContacts();
   }
 
   @override
@@ -36,7 +33,9 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         backgroundColor: Colors.deepPurple,
-        onPressed: () {},
+        onPressed: () {
+          _showContactPage();
+        },
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(10.0),
@@ -55,6 +54,7 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.all(10.0),
           child: Row(
             children: <Widget>[
+              //TODO: Componente
               Container(
                 width: 80.0,
                 height: 80.0,
@@ -90,6 +90,91 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      onTap: () {
+        _showOption(context, index);
+      },
     );
+  }
+
+  void _showContactPage({Contact contact}) async {
+    final recContact = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ContactPage(
+                  contact: contact,
+                )));
+
+    //TODO: Salvar o objeto na página de cadastro.
+    if (recContact != null) {
+      if (contact != null) {
+        await helper.updateContact(recContact);
+      } else {
+        await helper.saveContact(recContact);
+      }
+
+      _getAllContacts();
+    }
+  }
+
+  void _getAllContacts() async {
+    List list = await helper.getAllContacts();
+    setState(() {
+      contacts = list;
+    });
+  }
+
+  _showOption(BuildContext context, int index) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return BottomSheet(
+              onClosing: () {},
+              builder: (context) {
+                return Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: FlatButton(
+                          child: Text("Ligar",
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.deepPurple)),
+                          onPressed: () {},
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: FlatButton(
+                          child: Text("Editar",
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.deepPurple)),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _showContactPage(contact: contacts[index]);
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: FlatButton(
+                          child: Text("Excluir",
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.deepPurple)),
+                          onPressed: () {
+                            helper.deleteContact(contacts[index].id);
+                            setState(() {
+                              contacts.removeAt(index);
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              });
+        });
   }
 }
