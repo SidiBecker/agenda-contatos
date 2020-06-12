@@ -32,6 +32,8 @@ dependencies:
   url_launcher: ^5.0.2
   image_picker: 0.6.7+1
   flutter_masked_text: 0.8.0
+  string_mask: ^0.1.0
+
 
 dev_dependencies:
   flutter_test:

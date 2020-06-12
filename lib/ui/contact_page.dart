@@ -73,6 +73,7 @@ class _ContactPageState extends State<ContactPage> {
                   FocusScope.of(context).requestFocus(focusNode);
                 } else {
                   //TODO: Salvar o objeto nesta página
+                  _editedContact.phone =  _editedContact.phone.replaceAll(RegExp("[^0-9]"), "");
                   Navigator.pop(context, _editedContact);
                 }
               },

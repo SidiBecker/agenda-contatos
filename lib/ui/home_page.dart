@@ -5,6 +5,8 @@ import 'package:agenda_contatos/ui/contact_page.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:string_mask/string_mask.dart';
+
 enum OrderOptions { orderatoz, orderztoa }
 
 class HomePage extends StatefulWidget {
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(fontSize: 18.0),
                     ),
                     Text(
-                      contacts[index].phone ?? "",
+                      _getPhoneMasked(contacts[index].phone ?? ""),
                       style: TextStyle(fontSize: 18.0),
                     ),
                   ],
@@ -158,7 +160,8 @@ class _HomePageState extends State<HomePage> {
                         child: FlatButton(
                           child: Text("Ligar",
                               style: TextStyle(
-                                  fontSize: 20, color: Theme.of(context).primaryColor)),
+                                  fontSize: 20,
+                                  color: Theme.of(context).primaryColor)),
                           onPressed: () {
                             launch("tel:${contacts[index].phone}");
                             Navigator.pop(context);
@@ -170,7 +173,8 @@ class _HomePageState extends State<HomePage> {
                         child: FlatButton(
                           child: Text("Editar",
                               style: TextStyle(
-                                  fontSize: 20, color: Theme.of(context).primaryColor)),
+                                  fontSize: 20,
+                                  color: Theme.of(context).primaryColor)),
                           onPressed: () {
                             Navigator.pop(context);
                             _showContactPage(contact: contacts[index]);
@@ -182,7 +186,8 @@ class _HomePageState extends State<HomePage> {
                         child: FlatButton(
                           child: Text("Excluir",
                               style: TextStyle(
-                                  fontSize: 20, color: Theme.of(context).primaryColor)),
+                                  fontSize: 20,
+                                  color: Theme.of(context).primaryColor)),
                           onPressed: () {
                             helper.deleteContact(contacts[index].id);
                             setState(() {
@@ -213,5 +218,10 @@ class _HomePageState extends State<HomePage> {
     }
 
     setState(() {});
+  }
+
+  _getPhoneMasked(String value) {
+    var mask = new StringMask('(00) 00000-0000');
+    return mask.apply(value);
   }
 }
