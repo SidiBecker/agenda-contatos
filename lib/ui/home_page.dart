@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:agenda_contatos/helpers/contact_helper.dart';
+import 'package:agenda_contatos/helpers/util.dart';
 import 'package:agenda_contatos/ui/contact_page.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -125,12 +126,6 @@ class _HomePageState extends State<HomePage> {
 
     //TODO: Salvar o objeto na página de cadastro.
     if (recContact != null) {
-      if (contact != null) {
-        await helper.updateContact(recContact);
-      } else {
-        await helper.saveContact(recContact);
-      }
-
       _getAllContacts();
     }
   }
@@ -221,7 +216,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _getPhoneMasked(String value) {
-    var mask = new StringMask('(00) 00000-0000');
+    var mask = new StringMask(Util.PHONE_MASK);
     return mask.apply(value);
   }
 }

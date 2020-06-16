@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:agenda_contatos/helpers/contact_helper.dart';
+import 'package:agenda_contatos/helpers/util.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
@@ -15,17 +16,24 @@ class ContactPage extends StatefulWidget {
 }
 
 class _ContactPageState extends State<ContactPage> {
+  ContactHelper helper = ContactHelper();
+
   bool _userEdited = false;
   Contact _editedContact;
 
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   MaskedTextController _phoneController =
-      MaskedTextController(mask: '(00) 00000-0000');
+      MaskedTextController(mask: Util.PHONE_MASK);
 
   final _nameFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _phoneFocus = FocusNode();
+
+  bool _newContact = true;
+
+  final _formKey = GlobalKey<FormState>();
+  FocusNode _focusInvalid;
 
   @override
   void initState() {
@@ -34,6 +42,7 @@ class _ContactPageState extends State<ContactPage> {
     if (widget.contact == null) {
       _editedContact = Contact();
     } else {
+      _newContact = false;
       _editedContact = Contact.fromMap(widget.contact.toMap());
 
       setState(() {
@@ -53,28 +62,22 @@ class _ContactPageState extends State<ContactPage> {
             title: Text(_editedContact.name ?? "Novo Contato"),
           ),
           floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                bool valid = true;
-                FocusNode focusNode = FocusNode();
-
-                void fieldValidate(String valueField, FocusNode focus) {
-                  if (valid && (valueField == null || valueField.isEmpty)) {
-                    valid = false;
-                    focusNode = focus;
-                  }
-                }
-
-                fieldValidate(_editedContact.name, _nameFocus);
-                fieldValidate(_editedContact.email, _emailFocus);
-                fieldValidate(_editedContact.phone, _phoneFocus);
-
-                if (!valid) {
-                  //Coloca o foco no campo inválido
-                  FocusScope.of(context).requestFocus(focusNode);
-                } else {
+              onPressed: () async {
+                if (_formKey.currentState.validate()) {
                   //TODO: Salvar o objeto nesta página
-                  _editedContact.phone =  _editedContact.phone.replaceAll(RegExp("[^0-9]"), "");
+                  _editedContact.phone =
+                      _editedContact.phone.replaceAll(RegExp("[^0-9]"), "");
+
+                  if (_newContact) {
+                    await helper.saveContact(_editedContact);
+                  } else {
+                    await helper.updateContact(_editedContact);
+                  }
+
                   Navigator.pop(context, _editedContact);
+                } else {
+                  FocusScope.of(context).requestFocus(_focusInvalid);
+                  _focusInvalid = null;
                 }
               },
               child: Icon(Icons.save)),
@@ -84,6 +87,7 @@ class _ContactPageState extends State<ContactPage> {
               children: <Widget>[
                 GestureDetector(
                   child: Container(
+                    //TODO: Componente
                     width: 80.0,
                     height: 80.0,
                     decoration: BoxDecoration(
@@ -107,12 +111,35 @@ class _ContactPageState extends State<ContactPage> {
                     });
                   },
                 ),
-                _buildTextField("Name", _nameFocus, "name", TextInputType.text,
-                    _nameController),
-                _buildTextField("Email", _emailFocus, "email",
-                    TextInputType.emailAddress, _emailController),
-                _buildTextField("Phone", _phoneFocus, "phone",
-                    TextInputType.phone, _phoneController)
+                Form(
+                  key: _formKey,
+                  child: Column(children: <Widget>[
+                    // Add TextFormFields and RaisedButton here.
+                    _buildTextField(
+                        "Name",
+                        _nameFocus,
+                        "name",
+                        TextInputType.text,
+                        _nameController,
+                        TextInputAction.next,
+                        nextFocus: _emailFocus),
+                    _buildTextField(
+                        "Email",
+                        _emailFocus,
+                        "email",
+                        TextInputType.emailAddress,
+                        _emailController,
+                        TextInputAction.next,
+                        nextFocus: _phoneFocus),
+                    _buildTextField(
+                        "Phone",
+                        _phoneFocus,
+                        "phone",
+                        TextInputType.phone,
+                        _phoneController,
+                        TextInputAction.done)
+                  ]),
+                ),
               ],
             ),
           ),
@@ -151,10 +178,22 @@ class _ContactPageState extends State<ContactPage> {
     }
   }
 
-  Widget _buildTextField(String label, FocusNode focusNode, String prop,
-      TextInputType type, TextEditingController editingController) {
-    return TextField(
-        decoration: InputDecoration(labelText: label),
+  bool fieldValidate(String valueField, FocusNode focus) {
+    return !(valueField == null || valueField.isEmpty);
+  }
+
+  Widget _buildTextField(
+      String label,
+      FocusNode focusNode,
+      String prop,
+      TextInputType type,
+      TextEditingController editingController,
+      TextInputAction action,
+      {FocusNode nextFocus}) {
+    return TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+        ),
         focusNode: focusNode,
         onChanged: (text) {
           _userEdited = true;
@@ -164,6 +203,36 @@ class _ContactPageState extends State<ContactPage> {
           });
         },
         keyboardType: type,
-        controller: editingController);
+        controller: editingController,
+        textInputAction: action,
+        validator: (value) {
+          if (_userEdited && value.isEmpty) {
+            if (_focusInvalid == null) {
+              print(label);
+              _focusInvalid = focusNode;
+            }
+            return 'O campo não pode ser vazio!';
+          } else {
+            return null;
+          }
+        },
+        onFieldSubmitted: (value) {
+          if (value.isNotEmpty) {
+            if (action == TextInputAction.done) {
+              //TODO: Enviar formulário
+            } else {
+              _fieldFocusChange(context, focusNode, nextFocus);
+            }
+          } else {
+            //TODO: Validacao formulario
+            _formKey.currentState.validate();
+          }
+        });
   }
+}
+
+_fieldFocusChange(
+    BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
+  currentFocus.unfocus();
+  FocusScope.of(context).requestFocus(nextFocus);
 }

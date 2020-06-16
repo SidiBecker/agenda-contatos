@@ -146,6 +146,7 @@ class Contact {
     this.img = props['img'] ?? this.img;
   }
 
+
   @override
   String toString() {
     return "Contact(id: $id, name: $name, email: $email, phone: $phone, img: $img)";
